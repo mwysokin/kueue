@@ -414,5 +414,5 @@ type ResourceRetention struct {
 	//
 	// Defaults to null.
 	// +optional
-	FinishedWorkloadRetention *metav1.Duration `json:"finishedWorkloadRetention,omitempty"`
+	FinishedWorkloadRetention *metav1.Duration `json:"finishedWorkloadRetention"`
 }
