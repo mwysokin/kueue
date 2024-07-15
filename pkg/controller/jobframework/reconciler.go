@@ -332,7 +332,6 @@ func (r *JobReconciler) ReconcileGenericJob(ctx context.Context, req ctrl.Reques
 			return ctrl.Result{}, err
 		}
 
-		log.V(1).Info("MW-DEBUG: Workload with status condition finished is finished")
 		r.record.Eventf(object, corev1.EventTypeNormal, ReasonFinishedWorkload,
 			"Workload '%s' is declared finished", workload.Key(wl))
 		return ctrl.Result{}, workload.RemoveFinalizer(ctx, r.client, wl)
@@ -363,7 +362,6 @@ func (r *JobReconciler) ReconcileGenericJob(ctx context.Context, req ctrl.Reques
 			if err != nil && !apierrors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
-			log.V(1).Info("MW-DEBUG: Workload with standard reconciliation is finished")
 			r.record.Eventf(object, corev1.EventTypeNormal, ReasonFinishedWorkload,
 				"Workload '%s' is declared finished", workload.Key(wl))
 		}
