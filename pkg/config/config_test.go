@@ -380,9 +380,7 @@ resourceRetention:
 		WorkerLostTimeout: &metav1.Duration{Duration: configapi.DefaultMultiKueueWorkerLostTimeout},
 	}
 
-	defaultResourceRetention := &configapi.ResourceRetention{
-		FinishedWorkloadRetention: nil,
-	}
+	defaultResourceRetention := &configapi.ResourceRetention{}
 
 	testcases := []struct {
 		name              string
@@ -1011,9 +1009,7 @@ func TestEncode(t *testing.T) {
 					"origin":            "multikueue",
 					"workerLostTimeout": "15m0s",
 				},
-				"resourceRetention": map[string]any{
-					"finishedWorkloadRetention": nil,
-				},
+				"resourceRetention": map[string]any{},
 			},
 		},
 	}
