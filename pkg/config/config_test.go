@@ -380,8 +380,6 @@ resourceRetention:
 		WorkerLostTimeout: &metav1.Duration{Duration: configapi.DefaultMultiKueueWorkerLostTimeout},
 	}
 
-	defaultResourceRetention := &configapi.ResourceRetention{}
-
 	testcases := []struct {
 		name              string
 		configFile        string
@@ -399,7 +397,6 @@ resourceRetention:
 				Integrations:           defaultIntegrations,
 				QueueVisibility:        defaultQueueVisibility,
 				MultiKueue:             defaultMultiKueue,
-				ResourceRetention:      defaultResourceRetention,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -455,9 +452,8 @@ resourceRetention:
 						PodSelector: &metav1.LabelSelector{},
 					},
 				},
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				QueueVisibility: defaultQueueVisibility,
+				MultiKueue:      defaultMultiKueue,
 			},
 			wantOptions: defaultControlOptions,
 		},
@@ -476,7 +472,6 @@ resourceRetention:
 				Integrations:               defaultIntegrations,
 				QueueVisibility:            defaultQueueVisibility,
 				MultiKueue:                 defaultMultiKueue,
-				ResourceRetention:          defaultResourceRetention,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: ":38081",
@@ -511,11 +506,10 @@ resourceRetention:
 					WebhookServiceName: ptr.To("kueue-tenant-a-webhook-service"),
 					WebhookSecretName:  ptr.To("kueue-tenant-a-webhook-server-cert"),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection: defaultClientConnection,
+				Integrations:     defaultIntegrations,
+				QueueVisibility:  defaultQueueVisibility,
+				MultiKueue:       defaultMultiKueue,
 			},
 			wantOptions: defaultControlOptions,
 		},
@@ -532,11 +526,10 @@ resourceRetention:
 				InternalCertManagement: &configapi.InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection: defaultClientConnection,
+				Integrations:     defaultIntegrations,
+				QueueVisibility:  defaultQueueVisibility,
+				MultiKueue:       defaultMultiKueue,
 			},
 			wantOptions: defaultControlOptions,
 		},
@@ -555,7 +548,6 @@ resourceRetention:
 				Integrations:               defaultIntegrations,
 				QueueVisibility:            defaultQueueVisibility,
 				MultiKueue:                 defaultMultiKueue,
-				ResourceRetention:          defaultResourceRetention,
 			},
 
 			wantOptions: ctrl.Options{
@@ -598,11 +590,10 @@ resourceRetention:
 						BackoffMaxSeconds:  ptr.To[int32](1800),
 					},
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection: defaultClientConnection,
+				Integrations:     defaultIntegrations,
+				QueueVisibility:  defaultQueueVisibility,
+				MultiKueue:       defaultMultiKueue,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -637,10 +628,9 @@ resourceRetention:
 					QPS:   ptr.To[float32](50),
 					Burst: ptr.To[int32](100),
 				},
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				Integrations:    defaultIntegrations,
+				QueueVisibility: defaultQueueVisibility,
+				MultiKueue:      defaultMultiKueue,
 			},
 			wantOptions: defaultControlOptions,
 		},
@@ -659,10 +649,9 @@ resourceRetention:
 					QPS:   ptr.To[float32](50),
 					Burst: ptr.To[int32](100),
 				},
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				Integrations:    defaultIntegrations,
+				QueueVisibility: defaultQueueVisibility,
+				MultiKueue:      defaultMultiKueue,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -724,9 +713,8 @@ resourceRetention:
 						PodSelector: &metav1.LabelSelector{},
 					},
 				},
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				QueueVisibility: defaultQueueVisibility,
+				MultiKueue:      defaultMultiKueue,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -765,8 +753,7 @@ resourceRetention:
 						MaxCount: 0,
 					},
 				},
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				MultiKueue: defaultMultiKueue,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -824,8 +811,7 @@ resourceRetention:
 						},
 					},
 				},
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				MultiKueue: defaultMultiKueue,
 			},
 			wantOptions: ctrl.Options{
 				HealthProbeBindAddress: configapi.DefaultHealthProbeBindAddress,
@@ -864,7 +850,6 @@ resourceRetention:
 					Origin:            ptr.To("multikueue-manager1"),
 					WorkerLostTimeout: &metav1.Duration{Duration: 10 * time.Minute},
 				},
-				ResourceRetention: defaultResourceRetention,
 			},
 			wantOptions: defaultControlOptions,
 		},
@@ -1009,7 +994,6 @@ func TestEncode(t *testing.T) {
 					"origin":            "multikueue",
 					"workerLostTimeout": "15m0s",
 				},
-				"resourceRetention": map[string]any{},
 			},
 		},
 	}
