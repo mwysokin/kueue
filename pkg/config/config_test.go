@@ -380,9 +380,7 @@ objectRetentionPolicies:
 		WorkerLostTimeout: &metav1.Duration{Duration: configapi.DefaultMultiKueueWorkerLostTimeout},
 	}
 
-	defaultObjectRetentionPolicies := &configapi.ObjectRetentionPolicies{
-		FinishedWorkloadRetention: nil,
-	}
+	defaultObjectRetentionPolicies := &configapi.ObjectRetentionPolicies{}
 
 	testcases := []struct {
 		name              string
