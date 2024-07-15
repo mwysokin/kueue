@@ -601,6 +601,9 @@ func TestSetDefaults_Configuration(t *testing.T) {
 		},
 		"set resource retention for finished workloads": {
 			original: &Configuration{
+				InternalCertManagement: &InternalCertManagement{
+					Enable: ptr.To(false),
+				},
 				ResourceRetention: &ResourceRetention{
 					FinishedWorkloadRetention: &metav1.Duration{Duration: 30 * time.Minute},
 				},
