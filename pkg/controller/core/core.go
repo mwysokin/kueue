@@ -75,6 +75,7 @@ func SetupControllers(mgr ctrl.Manager, qManager *queue.Manager, cc *cache.Cache
 		mgr.GetEventRecorderFor(constants.WorkloadControllerName),
 		WithWorkloadUpdateWatchers(qRec, cqRec),
 		WithWaitForPodsReady(waitForPodsReady(cfg.WaitForPodsReady)),
+		WithWorkloadResourceRetention(cfg.ResourceRetention.FinishedWorkloadRetention),
 	).SetupWithManager(mgr, cfg); err != nil {
 		return "Workload", err
 	}
