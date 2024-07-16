@@ -71,6 +71,7 @@ type waitForPodsReadyConfig struct {
 type options struct {
 	watchers               []WorkloadUpdateWatcher
 	waitForPodsReadyConfig *waitForPodsReadyConfig
+	resourceRetention      *metav1.Duration
 }
 
 // Option configures the reconciler.
@@ -90,6 +91,13 @@ func WithWorkloadUpdateWatchers(value ...WorkloadUpdateWatcher) Option {
 	}
 }
 
+// WithWorkloadResourceRetention allows to specify retention for workload resources
+func WithWorkloadResourceRetention(value *metav1.Duration) Option {
+	return func(o *options) {
+		o.resourceRetention = value
+	}
+}
+
 var defaultOptions = options{}
 
 type WorkloadUpdateWatcher interface {
@@ -98,14 +106,15 @@ type WorkloadUpdateWatcher interface {
 
 // WorkloadReconciler reconciles a Workload object
 type WorkloadReconciler struct {
-	log              logr.Logger
-	queues           *queue.Manager
-	cache            *cache.Cache
-	client           client.Client
-	watchers         []WorkloadUpdateWatcher
-	waitForPodsReady *waitForPodsReadyConfig
-	recorder         record.EventRecorder
-	clock            clock.Clock
+	log               logr.Logger
+	queues            *queue.Manager
+	cache             *cache.Cache
+	client            client.Client
+	watchers          []WorkloadUpdateWatcher
+	waitForPodsReady  *waitForPodsReadyConfig
+	recorder          record.EventRecorder
+	clock             clock.Clock
+	resourceRetention *metav1.Duration
 }
 
 func NewWorkloadReconciler(client client.Client, queues *queue.Manager, cache *cache.Cache, recorder record.EventRecorder, opts ...Option) *WorkloadReconciler {
@@ -115,14 +124,15 @@ func NewWorkloadReconciler(client client.Client, queues *queue.Manager, cache *c
 	}
 
 	return &WorkloadReconciler{
-		log:              ctrl.Log.WithName("workload-reconciler"),
-		client:           client,
-		queues:           queues,
-		cache:            cache,
-		watchers:         options.watchers,
-		waitForPodsReady: options.waitForPodsReadyConfig,
-		recorder:         recorder,
-		clock:            realClock,
+		log:               ctrl.Log.WithName("workload-reconciler"),
+		client:            client,
+		queues:            queues,
+		cache:             cache,
+		watchers:          options.watchers,
+		waitForPodsReady:  options.waitForPodsReadyConfig,
+		recorder:          recorder,
+		clock:             realClock,
+		resourceRetention: options.resourceRetention,
 	}
 }
 
@@ -148,7 +158,13 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if apimeta.IsStatusConditionTrue(wl.Status.Conditions, kueue.WorkloadFinished) {
-		return ctrl.Result{}, nil
+		if r.resourceRetention == nil {
+			log.V(2).Info("MW-DEBUG: Workload deletion needed but not configured")
+		}
+		if r.resourceRetention != nil && wl.DeletionTimestamp.IsZero() && r.clock.Now().After(wl.Status.Conditions[0].LastTransitionTime.Time.Add(r.resourceRetention.Duration)) {
+			log.V(2).Info("MW-DEBUG: Deleting completed workload older than:", r.resourceRetention, wl.Name)
+			return ctrl.Result{}, nil
+		}
 	}
 
 	if workload.IsActive(&wl) {
