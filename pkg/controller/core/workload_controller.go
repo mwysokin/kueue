@@ -159,24 +159,27 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	finishedCond := apimeta.FindStatusCondition(wl.Status.Conditions, kueue.WorkloadFinished)
-	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue {
+	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue && r.canWorkloadBeDeleted(&wl) {
 		// handling a finished workflow, deciding whether to delete the workload or not
-		if r.canWorkloadBeDeleted(&wl) {
-			now := r.clock.Now()
-			expirationTime := finishedCond.LastTransitionTime.Add(r.resourceRetention.Duration)
-			if now.After(expirationTime) {
-				log.V(2).Info("Deleting workload because it has finished and the retention period has elapsed", "retention", r.resourceRetention.Duration)
-				err := r.workloadResourceDeletion(ctx, &wl)
-				if err != nil {
-					return ctrl.Result{}, fmt.Errorf("failed to delete workload: %w", err)
-				}
-				r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted workload %v", wl.Name)
-			} else {
-				remainingTime := expirationTime.Sub(now)
-				log.V(2).Info("Requeueing workload for deletion after retention period", "remainingTime", remainingTime)
-				// 1 second is added to deal with potential race conditions causing yet another requeue before the expiration time
-				return ctrl.Result{RequeueAfter: remainingTime + 1*time.Second}, nil
+		now := r.clock.Now()
+		expirationTime := finishedCond.LastTransitionTime.Add(r.resourceRetention.Duration)
+		if now.After(expirationTime) {
+			log.V(2).Info("Deleting workload because it has finished and the retention period has elapsed", "retention", r.resourceRetention.Duration)
+			err := r.workloadResourceDeletion(ctx, &wl)
+			if err != nil {
+				log.Error(err, "Failed to delete workload")
+				return ctrl.Result{}, fmt.Errorf("failed to delete workload: %w", err)
 			}
+			r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted workload %v", wl.Name)
+		} else {
+			remainingTime := expirationTime.Sub(now)
+			// Minimum requeue time to prevent excessive requeuing
+			minRequeueTime := 5 * time.Second
+			if remainingTime < minRequeueTime {
+				remainingTime = minRequeueTime
+			}
+			log.V(2).Info("Requeueing workload for deletion after retention period", "remainingTime", remainingTime)
+			return ctrl.Result{RequeueAfter: remainingTime}, nil
 		}
 		return ctrl.Result{}, nil
 	}
