@@ -72,7 +72,7 @@ type waitForPodsReadyConfig struct {
 type options struct {
 	watchers               []WorkloadUpdateWatcher
 	waitForPodsReadyConfig *waitForPodsReadyConfig
-	resourceRetention      *metav1.Duration
+	objectRetention        *metav1.Duration
 }
 
 // Option configures the reconciler.
@@ -92,10 +92,10 @@ func WithWorkloadUpdateWatchers(value ...WorkloadUpdateWatcher) Option {
 	}
 }
 
-// WithWorkloadResourceRetention allows to specify retention for workload resources
-func WithWorkloadResourceRetention(value *metav1.Duration) Option {
+// WithWorkloadObjectRetention allows to specify retention for workload resources
+func WithWorkloadObjectRetention(value *metav1.Duration) Option {
 	return func(o *options) {
-		o.resourceRetention = value
+		o.objectRetention = value
 	}
 }
 
@@ -107,15 +107,15 @@ type WorkloadUpdateWatcher interface {
 
 // WorkloadReconciler reconciles a Workload object
 type WorkloadReconciler struct {
-	log               logr.Logger
-	queues            *queue.Manager
-	cache             *cache.Cache
-	client            client.Client
-	watchers          []WorkloadUpdateWatcher
-	waitForPodsReady  *waitForPodsReadyConfig
-	recorder          record.EventRecorder
-	clock             clock.Clock
-	resourceRetention *metav1.Duration
+	log              logr.Logger
+	queues           *queue.Manager
+	cache            *cache.Cache
+	client           client.Client
+	watchers         []WorkloadUpdateWatcher
+	waitForPodsReady *waitForPodsReadyConfig
+	recorder         record.EventRecorder
+	clock            clock.Clock
+	objectRetention  *metav1.Duration
 }
 
 func NewWorkloadReconciler(client client.Client, queues *queue.Manager, cache *cache.Cache, recorder record.EventRecorder, opts ...Option) *WorkloadReconciler {
@@ -125,15 +125,15 @@ func NewWorkloadReconciler(client client.Client, queues *queue.Manager, cache *c
 	}
 
 	return &WorkloadReconciler{
-		log:               ctrl.Log.WithName("workload-reconciler"),
-		client:            client,
-		queues:            queues,
-		cache:             cache,
-		watchers:          options.watchers,
-		waitForPodsReady:  options.waitForPodsReadyConfig,
-		recorder:          recorder,
-		clock:             realClock,
-		resourceRetention: options.resourceRetention,
+		log:              ctrl.Log.WithName("workload-reconciler"),
+		client:           client,
+		queues:           queues,
+		cache:            cache,
+		watchers:         options.watchers,
+		waitForPodsReady: options.waitForPodsReadyConfig,
+		recorder:         recorder,
+		clock:            realClock,
+		objectRetention:  options.objectRetention,
 	}
 }
 
@@ -162,9 +162,9 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue && r.canWorkloadBeDeleted(&wl) {
 		// handling a finished workflow, deciding whether to delete the workload or not
 		now := r.clock.Now()
-		expirationTime := finishedCond.LastTransitionTime.Add(r.resourceRetention.Duration)
+		expirationTime := finishedCond.LastTransitionTime.Add(r.objectRetention.Duration)
 		if now.After(expirationTime) {
-			log.V(2).Info("Deleting workload because it has finished and the retention period has elapsed", "retention", r.resourceRetention.Duration)
+			log.V(2).Info("Deleting workload because it has finished and the retention period has elapsed", "retention", r.objectRetention.Duration)
 			err := r.workloadResourceDeletion(ctx, &wl)
 			if err != nil {
 				log.Error(err, "Failed to delete workload")
@@ -484,7 +484,7 @@ func (r *WorkloadReconciler) reconcileOnClusterQueueActiveState(ctx context.Cont
 // canWorkloadBeDeleted returns true if the workload can be deleted, when workload resource
 // retention is set and when the workload is not being deleted.
 func (r *WorkloadReconciler) canWorkloadBeDeleted(wl *kueue.Workload) bool {
-	if r.resourceRetention == nil || !wl.DeletionTimestamp.IsZero() {
+	if r.objectRetention == nil || !wl.DeletionTimestamp.IsZero() {
 		return false // No retention policy or already being deleted
 	}
 	return true
