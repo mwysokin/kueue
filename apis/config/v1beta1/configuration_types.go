@@ -77,9 +77,9 @@ type Configuration struct {
 	// Resources provides additional configuration options for handling the resources.
 	Resources *Resources `json:"resources,omitempty"`
 
-	// ResourceRetention provides configuration options for retention of kueue owned
+	// ObjectRetentionPolicies provides configuration options for retention of kueue owned
 	// resources.
-	ResourceRetention *ResourceRetention `json:"resourceRetention,omitempty"`
+	ObjectRetentionPolicies *ObjectRetentionPolicies `json:"objectRetentionPolicies,omitempty"`
 }
 
 type ControllerManager struct {
@@ -405,7 +405,7 @@ type FairSharing struct {
 	PreemptionStrategies []PreemptionStrategy `json:"preemptionStrategies,omitempty"`
 }
 
-type ResourceRetention struct {
+type ObjectRetentionPolicies struct {
 	// FinishedWorkloadRetention is the duration to retain finished Workloads.
 	// A duration of 0 will delete finished Workloads immediately.
 	// A nil value will disable automatic deletion.

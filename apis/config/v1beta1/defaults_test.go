@@ -102,7 +102,7 @@ func TestSetDefaults_Configuration(t *testing.T) {
 		WorkerLostTimeout: &metav1.Duration{Duration: DefaultMultiKueueWorkerLostTimeout},
 	}
 
-	defaultResourceRetention := &ResourceRetention{
+	defaultObjectRetentionPolicies := &ObjectRetentionPolicies{
 		FinishedWorkloadRetention: nil,
 	}
 
@@ -125,11 +125,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"defaulting ControllerManager": {
@@ -167,11 +167,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"should not default ControllerManager": {
@@ -225,11 +225,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"should not set LeaderElectionID": {
@@ -267,11 +267,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"defaulting InternalCertManagement": {
@@ -286,11 +286,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					WebhookServiceName: ptr.To(DefaultWebhookServiceName),
 					WebhookSecretName:  ptr.To(DefaultWebhookSecretName),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      overwriteNamespaceIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            overwriteNamespaceIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"should not default InternalCertManagement": {
@@ -306,11 +306,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      overwriteNamespaceIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            overwriteNamespaceIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"should not default values in custom ClientConnection": {
@@ -334,10 +334,10 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					QPS:   ptr.To[float32](123.0),
 					Burst: ptr.To[int32](456),
 				},
-				Integrations:      overwriteNamespaceIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				Integrations:            overwriteNamespaceIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"should default empty custom ClientConnection": {
@@ -354,11 +354,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      overwriteNamespaceIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            overwriteNamespaceIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"defaulting waitForPodsReady values": {
@@ -386,11 +386,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"set waitForPodsReady.blockAdmission to false when enable is false": {
@@ -418,11 +418,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"respecting provided waitForPodsReady values": {
@@ -456,11 +456,11 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ClientConnection:  defaultClientConnection,
-				Integrations:      defaultIntegrations,
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				ClientConnection:        defaultClientConnection,
+				Integrations:            defaultIntegrations,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"integrations": {
@@ -483,9 +483,9 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					Frameworks: []string{"a", "b"},
 					PodOptions: defaultIntegrations.PodOptions,
 				},
-				QueueVisibility:   defaultQueueVisibility,
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				QueueVisibility:         defaultQueueVisibility,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"queue visibility": {
@@ -514,8 +514,8 @@ func TestSetDefaults_Configuration(t *testing.T) {
 						MaxCount: 0,
 					},
 				},
-				MultiKueue:        defaultMultiKueue,
-				ResourceRetention: defaultResourceRetention,
+				MultiKueue:              defaultMultiKueue,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"multiKueue": {
@@ -543,7 +543,7 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					Origin:            ptr.To("multikueue-manager1"),
 					WorkerLostTimeout: &metav1.Duration{Duration: time.Minute},
 				},
-				ResourceRetention: defaultResourceRetention,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"multiKueue GCInterval 0": {
@@ -570,7 +570,7 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					Origin:            ptr.To("multikueue-manager1"),
 					WorkerLostTimeout: &metav1.Duration{Duration: 15 * time.Minute},
 				},
-				ResourceRetention: defaultResourceRetention,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
 		"add default fair sharing configuration when enabled": {
@@ -596,15 +596,15 @@ func TestSetDefaults_Configuration(t *testing.T) {
 					Enable:               true,
 					PreemptionStrategies: []PreemptionStrategy{LessThanOrEqualToFinalShare, LessThanInitialShare},
 				},
-				ResourceRetention: defaultResourceRetention,
+				ObjectRetentionPolicies: defaultObjectRetentionPolicies,
 			},
 		},
-		"set resource retention for finished workloads": {
+		"set object retention policy for finished workloads": {
 			original: &Configuration{
 				InternalCertManagement: &InternalCertManagement{
 					Enable: ptr.To(false),
 				},
-				ResourceRetention: &ResourceRetention{
+				ObjectRetentionPolicies: &ObjectRetentionPolicies{
 					FinishedWorkloadRetention: &metav1.Duration{Duration: 30 * time.Minute},
 				},
 			},
@@ -618,7 +618,7 @@ func TestSetDefaults_Configuration(t *testing.T) {
 				Integrations:     defaultIntegrations,
 				QueueVisibility:  defaultQueueVisibility,
 				MultiKueue:       defaultMultiKueue,
-				ResourceRetention: &ResourceRetention{
+				ObjectRetentionPolicies: &ObjectRetentionPolicies{
 					FinishedWorkloadRetention: &metav1.Duration{Duration: 30 * time.Minute},
 				},
 			},
