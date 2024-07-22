@@ -20,7 +20,6 @@ import (
 	"cmp"
 	"context"
 	"fmt"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"slices"
 	"time"
 
@@ -159,29 +158,27 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	finishedCond := apimeta.FindStatusCondition(wl.Status.Conditions, kueue.WorkloadFinished)
-	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue && r.canWorkloadBeDeleted(&wl) {
+	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue {
+		if r.objectRetention == nil || !wl.DeletionTimestamp.IsZero() {
+			// no object retention configured or workflow object is already being deleted
+			return ctrl.Result{}, nil
+		}
 		// handling a finished workflow, deciding whether to delete the workload or not
 		now := r.clock.Now()
 		expirationTime := finishedCond.LastTransitionTime.Add(r.objectRetention.Duration)
 		if now.After(expirationTime) {
 			log.V(2).Info("Deleting workload because it has finished and the retention period has elapsed", "retention", r.objectRetention.Duration)
-			err := r.workloadResourceDeletion(ctx, &wl)
+			err := r.client.Delete(ctx, &wl)
 			if err != nil {
-				log.Error(err, "Failed to delete workload")
-				return ctrl.Result{}, fmt.Errorf("failed to delete workload: %w", err)
+				log.Error(err, "Failed to delete workload from the API server")
+				return ctrl.Result{}, fmt.Errorf("deleting workflow from the API server: %w", err)
 			}
 			r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted workload %v", wl.Name)
 		} else {
 			remainingTime := expirationTime.Sub(now)
-			// Minimum requeue time to prevent excessive requeuing
-			minRequeueTime := 5 * time.Second
-			if remainingTime < minRequeueTime {
-				remainingTime = minRequeueTime
-			}
 			log.V(2).Info("Requeueing workload for deletion after retention period", "remainingTime", remainingTime)
 			return ctrl.Result{RequeueAfter: remainingTime}, nil
 		}
-		return ctrl.Result{}, nil
 	}
 
 	if workload.IsActive(&wl) {
@@ -479,46 +476,6 @@ func (r *WorkloadReconciler) reconcileOnClusterQueueActiveState(ctx context.Cont
 	}
 
 	return false, nil
-}
-
-// canWorkloadBeDeleted returns true if the workload can be deleted, when workload resource
-// retention is set and when the workload is not being deleted.
-func (r *WorkloadReconciler) canWorkloadBeDeleted(wl *kueue.Workload) bool {
-	if r.objectRetention == nil || !wl.DeletionTimestamp.IsZero() {
-		return false // No retention policy or already being deleted
-	}
-	return true
-}
-
-// workloadResourceDeletion deletes the workload from queues, cache and the API server.
-func (r *WorkloadReconciler) workloadResourceDeletion(ctx context.Context, wl *kueue.Workload) error {
-	log := ctrl.LoggerFrom(ctx)
-
-	// Pre-deletion cleanup
-	r.queues.DeleteWorkload(wl)
-	if err := r.cache.DeleteWorkload(wl); err != nil {
-		log.Error(err, "Failed to delete workload from cache")
-	}
-
-	// Backoff configuration
-	backoff := wait.Backoff{
-		Duration: 100 * time.Millisecond,
-		Factor:   1.5,
-		Jitter:   0.2,
-		Steps:    5,
-	}
-
-	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
-		err := r.client.Delete(ctx, wl)
-		if err != nil {
-			if apierrors.IsConflict(err) {
-				return false, nil // Retry on conflict
-			}
-			return false, fmt.Errorf("deleting workload from API server: %w", err)
-		}
-		return true, nil
-	})
-	return err
 }
 
 func syncAdmissionCheckConditions(conds []kueue.AdmissionCheckState, admissionChecks sets.Set[string]) ([]kueue.AdmissionCheckState, bool) {
