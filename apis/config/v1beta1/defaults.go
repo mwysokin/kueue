@@ -194,8 +194,6 @@ func SetDefaults_Configuration(cfg *Configuration) {
 		fs.PreemptionStrategies = []PreemptionStrategy{LessThanOrEqualToFinalShare, LessThanInitialShare}
 	}
 	if cfg.ObjectRetentionPolicies == nil {
-		cfg.ObjectRetentionPolicies = &ObjectRetentionPolicies{
-			FinishedWorkloadRetention: nil,
-		}
+		cfg.ObjectRetentionPolicies = &ObjectRetentionPolicies{}
 	}
 }
