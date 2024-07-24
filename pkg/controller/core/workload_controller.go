@@ -154,16 +154,15 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	log.V(2).Info("Reconciling Workload")
 
 	if len(wl.ObjectMeta.OwnerReferences) == 0 && !wl.DeletionTimestamp.IsZero() {
+		// manual deletion triggered by the user
 		return ctrl.Result{}, workload.RemoveFinalizer(ctx, r.client, &wl)
 	}
 
 	finishedCond := apimeta.FindStatusCondition(wl.Status.Conditions, kueue.WorkloadFinished)
 	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue {
-		if r.objectRetention == nil || !wl.DeletionTimestamp.IsZero() {
-			// no object retention configured or workflow object is already being deleted
+		if r.objectRetention == nil  {
 			return ctrl.Result{}, nil
 		}
-		// handling a finished workflow, deciding whether to delete the workload or not
 		now := r.clock.Now()
 		expirationTime := finishedCond.LastTransitionTime.Add(r.objectRetention.Duration)
 		if now.After(expirationTime) {

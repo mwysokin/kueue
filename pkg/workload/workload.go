@@ -497,17 +497,6 @@ func SetEvictedCondition(w *kueue.Workload, reason string, message string) {
 	apimeta.SetStatusCondition(&w.Status.Conditions, condition)
 }
 
-func SetDeletedCondition(w *kueue.Workload, reason string) {
-	condition := metav1.Condition{
-		Type:               kueue.WorkloadDeleted,
-		Status:             metav1.ConditionTrue,
-		Reason:             reason,
-		Message:            "The workload is being deleted",
-		ObservedGeneration: w.Generation,
-	}
-	apimeta.SetStatusCondition(&w.Status.Conditions, condition)
-}
-
 // AdmissionStatusPatch creates a new object based on the input workload that contains
 // the admission and related conditions. The object can be used in Server-Side-Apply.
 // If strict is true, resourceVersion will be part of the patch.

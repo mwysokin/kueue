@@ -332,9 +332,6 @@ const (
 	// WorkloadDeactivationTarget means that the Workload should be deactivated.
 	// This condition is temporary, so it should be removed after deactivation.
 	WorkloadDeactivationTarget = "DeactivationTarget"
-
-	//WorkloadDeleted means that the Workload was deleted.
-	WorkloadDeleted = "Deleted"
 )
 
 const (
