@@ -407,7 +407,7 @@ type FairSharing struct {
 
 type ObjectRetentionPolicies struct {
 	// FinishedWorkloadRetention is the duration to retain finished Workloads.
-	// A duration of 0 will delete finished Workloads immediately.
+	// A duration of 0s will delete finished Workloads immediately.
 	// A nil value will disable automatic deletion.
 	// The value is represented using the metav1.Duration format, allowing for flexible
 	// specification of time units (e.g., "24h", "1h30m", "30s").
