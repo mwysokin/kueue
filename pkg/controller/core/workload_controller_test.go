@@ -1314,7 +1314,7 @@ func TestReconcile(t *testing.T) {
 				}).
 				Obj(),
 		},
-		"shouldn't delete the workflow because, object retention not configured": {
+		"shouldn't delete the workload because, object retention not configured": {
 			workload: utiltesting.MakeWorkload("wl", "ns").
 				Condition(metav1.Condition{
 					Type:   kueue.WorkloadFinished,
