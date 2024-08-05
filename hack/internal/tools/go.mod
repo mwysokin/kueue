@@ -3,7 +3,7 @@ module sigs.k8s.io/kueue/internal/tools
 go 1.22.4
 
 require (
-	github.com/gohugoio/hugo v0.128.2
+	github.com/gohugoio/hugo v0.129.0
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/mikefarah/yq/v4 v4.44.2
 	github.com/onsi/ginkgo/v2 v2.19.0
@@ -11,8 +11,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	gotest.tools/gotestsum v1.12.0
 	helm.sh/helm/v3 v3.15.3
-	k8s.io/code-generator v0.30.2
-	k8s.io/component-base v0.30.2
+	k8s.io/code-generator v0.30.3
+	k8s.io/component-base v0.30.3
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20240605185440-12cc8d59fabe
 	sigs.k8s.io/controller-tools v0.15.0
 	sigs.k8s.io/kind v0.23.0
@@ -119,12 +119,12 @@ require (
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.30.2 // indirect
+	k8s.io/api v0.30.3 // indirect
 	k8s.io/apiextensions-apiserver v0.30.1 // indirect
-	k8s.io/apimachinery v0.30.2 // indirect
+	k8s.io/apimachinery v0.30.3 // indirect
 	k8s.io/apiserver v0.30.1 // indirect
 	k8s.io/cli-runtime v0.30.0 // indirect
-	k8s.io/client-go v0.30.2 // indirect
+	k8s.io/client-go v0.30.3 // indirect
 	k8s.io/gengo/v2 v2.0.0-20240404160639-a0386bf69313 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240521193020-835d969ad83a // indirect

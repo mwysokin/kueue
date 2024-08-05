@@ -37,7 +37,7 @@ Please do not remove items from the checklist
 - [ ] An OWNER pushes the tag with
       `git push $VERSION`
   - Triggers prow to build and publish a staging container image
-      `gcr.io/k8s-staging-kueue/kueue:$VERSION`
+      `us-central1-docker.pkg.dev/k8s-staging-images/kueue/kueue:$VERSION`
 - [ ] Submit a PR against [k8s.io](https://github.com/kubernetes/k8s.io),
       updating `registry.k8s.io/images/k8s-staging-kueue/images.yaml` to
       [promote the container images](https://github.com/kubernetes/k8s.io/tree/main/k8s.gcr.io#image-promoter)
@@ -51,8 +51,9 @@ Please do not remove items from the checklist
 - [ ] Send an announcement email to `sig-scheduling@kubernetes.io` and `wg-batch@kubernetes.io` with the subject `[ANNOUNCE] kueue $VERSION is released`.   <!--Link: example https://groups.google.com/a/kubernetes.io/g/wg-batch/c/-gZOrSnwDV4 -->
 - [ ] Update the below files with respective values in `main` branch :
   - Latest version in `README.md`
+  - Latest version in `cmd/experimental/kjobctl/docs/installation.md`
   - Release notes in the `CHANGELOG`
-  - `version` in `site/config.toml`
+  - `version` in `site/hugo.toml`
   - `appVersion` in `charts/kueue/Chart.yaml`
   - `last-updated`, `last-reviewed`, `commit-hash`, `project-release`, `distribution-points` and `sbom-file` in `SECURITY-INSIGHTS.yaml`
 - [ ] For a major or minor release, prepare the repo for the next version:
