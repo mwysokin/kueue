@@ -77,8 +77,8 @@ type Configuration struct {
 	// Resources provides additional configuration options for handling the resources.
 	Resources *Resources `json:"resources,omitempty"`
 
-	// ObjectRetentionPolicies provides configuration options for retention of kueue owned
-	// resources.
+	// ObjectRetentionPolicies provides configuration options for retention of Kueue owned
+	// objects. A nil value will disable automatic deletion for all objects.
 	ObjectRetentionPolicies *ObjectRetentionPolicies `json:"objectRetentionPolicies,omitempty"`
 }
 
