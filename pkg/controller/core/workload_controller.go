@@ -171,7 +171,7 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				log.Error(err, "Failed to delete workload from the API server")
 				return ctrl.Result{}, fmt.Errorf("deleting workflow from the API server: %w", err)
 			}
-			r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted finished workload due to elapsed retention:  %v", workload.Key(wl))
+			r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted finished workload due to elapsed retention:  %v", workload.Key(&wl))
 		} else {
 			remainingTime := expirationTime.Sub(now)
 			log.V(2).Info("Requeueing workload for deletion after retention period", "remainingTime", remainingTime)
