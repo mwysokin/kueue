@@ -160,7 +160,7 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	finishedCond := apimeta.FindStatusCondition(wl.Status.Conditions, kueue.WorkloadFinished)
 	if finishedCond != nil && finishedCond.Status == metav1.ConditionTrue {
-		if r.objectRetention == nil  {
+		if r.objectRetention == nil {
 			return ctrl.Result{}, nil
 		}
 		now := r.clock.Now()
@@ -177,6 +177,16 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			log.V(2).Info("Requeueing workload for deletion after retention period", "remainingTime", remainingTime)
 			return ctrl.Result{RequeueAfter: remainingTime}, nil
 		}
+	}
+
+	if !r.hasJobOwnerReference(&wl) {
+		log.V(2).Info("Deleting orphaned workload")
+		if err := r.client.Delete(ctx, &wl); err != nil {
+			log.Error(err, "Failed to delete orphaned workload from the API server")
+			return ctrl.Result{}, fmt.Errorf("deleting orphaned workflow from the API server: %w", err)
+		}
+		r.recorder.Eventf(&wl, corev1.EventTypeNormal, "Deleted", "Deleted orphaned workload:  %v", workload.Key(&wl))
+		return ctrl.Result{}, nil
 	}
 
 	if workload.IsActive(&wl) {
@@ -577,6 +587,15 @@ func (r *WorkloadReconciler) triggerDeactivationOrBackoffRequeue(ctx context.Con
 	wl.Status.RequeueState.RequeueAt = ptr.To(metav1.NewTime(r.clock.Now().Add(waitDuration)))
 	wl.Status.RequeueState.Count = &requeuingCount
 	return false, nil
+}
+
+func (r *WorkloadReconciler) hasJobOwnerReference(wl *kueue.Workload) bool {
+	for _, ref := range wl.OwnerReferences {
+		if ref.Kind == "Job" {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *WorkloadReconciler) Create(e event.CreateEvent) bool {
