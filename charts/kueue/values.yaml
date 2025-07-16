@@ -18,7 +18,11 @@ enableKueueViz: false
 kubernetesClusterDomain: cluster.local
 controllerManager:
   # -- ControllerManager's feature gates
-  featureGates: []
+  featureGates:
+  - name: TopologyAwareScheduling
+    enabled: true
+  - name: LocalQueueDefaulting
+    enabled: true
   #  - name: PartialAdmission
   #    enabled: true
   manager:
@@ -269,3 +273,7 @@ metrics:
     # -- ServiceMonitor's tlsConfig
     tlsConfig:
       insecureSkipVerify: true
+autoKueue:
+  enable: true
+  autoKueueNamespace: default
+  clusterQueueName: cq
