@@ -32,7 +32,7 @@ controllerManager:
       # -- ControllerManager's image repository
       repository: us-central1-docker.pkg.dev/k8s-staging-images/kueue/kueue
       # -- ControllerManager's image tag
-      tag: main
+      tag: v0.12.4
       # -- ControllerManager's image pullPolicy.
       # This should be set to 'IfNotPresent' for released version
       pullPolicy: Always

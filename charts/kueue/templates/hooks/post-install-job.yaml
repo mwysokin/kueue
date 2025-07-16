@@ -53,8 +53,7 @@ data:
     kind: LocalQueue
     metadata:
       name: default
-      # The LocalQueue can still be created in a different, specific namespace
-      namespace: {{ .Values.autoKueue.defaultAutoKueueNamespace | quote }}
+      namespace: default
     spec:
       clusterQueue: {{ .Values.autoKueue.clusterQueueName | quote }}
 
