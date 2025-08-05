@@ -32,7 +32,7 @@ controllerManager:
       # -- ControllerManager's image repository
       repository: us-central1-docker.pkg.dev/k8s-staging-images/kueue/kueue
       # -- ControllerManager's image tag
-      tag: v0.12.4
+      tag: v0.13.1
       # -- ControllerManager's image pullPolicy.
       # This should be set to 'IfNotPresent' for released version
       pullPolicy: Always
@@ -134,11 +134,11 @@ managerConfig:
     #    backoffBaseSeconds: 60
     #    backoffMaxSeconds: 3600
     #manageJobsWithoutQueueName: true
-    #managedJobsNamespaceSelector:
-    #  matchExpressions:
-    #    - key: kubernetes.io/metadata.name
-    #      operator: NotIn
-    #      values: [ kube-system, kueue-system ]
+    managedJobsNamespaceSelector:
+     matchExpressions:
+       - key: kubernetes.io/metadata.name
+         operator: NotIn
+         values: [ kube-system, kueue-system ]
     #internalCertManagement:
     #  enable: false
     #  webhookServiceName: ""
@@ -156,10 +156,10 @@ managerConfig:
       - "kubeflow.org/xgboostjob"
       - "kubeflow.org/jaxjob"
       - "workload.codeflare.dev/appwrapper"
-    #  - "pod"
+     - "pod"
     #  - "deployment" (requires enabling pod integration)
     #  - "statefulset" (requires enabling pod integration)
-    #  - "leaderworkerset.x-k8s.io/leaderworkerset" (requires enabling pod integration)
+     - "leaderworkerset.x-k8s.io/leaderworkerset" (requires enabling pod integration)
     #  externalFrameworks:
     #  - "Foo.v1.example.com"
     #fairSharing:
