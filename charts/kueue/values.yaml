@@ -19,10 +19,10 @@ kubernetesClusterDomain: cluster.local
 controllerManager:
   # -- ControllerManager's feature gates
   featureGates:
-  - name: TopologyAwareScheduling
-    enabled: true
-  - name: LocalQueueDefaulting
-    enabled: true
+   - name: TopologyAwareScheduling
+     enabled: true
+   - name: LocalQueueDefaulting
+     enabled: true
   #  - name: PartialAdmission
   #    enabled: true
   manager:
@@ -156,10 +156,10 @@ managerConfig:
       - "kubeflow.org/xgboostjob"
       - "kubeflow.org/jaxjob"
       - "workload.codeflare.dev/appwrapper"
-     - "pod"
-    #  - "deployment" (requires enabling pod integration)
-    #  - "statefulset" (requires enabling pod integration)
-     - "leaderworkerset.x-k8s.io/leaderworkerset" (requires enabling pod integration)
+      - "pod"
+      - "leaderworkerset.x-k8s.io/leaderworkerset"
+      #  - "deployment" (requires enabling pod integration)
+      #  - "statefulset" (requires enabling pod integration)
     #  externalFrameworks:
     #  - "Foo.v1.example.com"
     #fairSharing:
