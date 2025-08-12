@@ -33,9 +33,6 @@ description: >
 Make sure the following conditions are met:
 
 - A Kubernetes cluster with version 1.29 or newer is running. Learn how to [install the Kubernetes tools](https://kubernetes.io/docs/tasks/tools/).
-- The `SuspendJob` [feature gate][feature_gate] is enabled. In Kubernetes 1.22 or newer, the feature gate is enabled by default.
-- (Optional) The `JobMutableNodeSchedulingDirectives` [feature gate][feature_gate] (available in Kubernetes 1.22 or newer) is enabled.
-  In Kubernetes 1.23 or newer, the feature gate is enabled by default.
 - The kubectl command-line tool has communication with your cluster.
 
 Kueue publishes [metrics](/docs/reference/metrics) to monitor its operators.
@@ -265,51 +262,48 @@ spec:
 
 ### Feature gates for alpha and beta features
 
-| Feature                               | Default | Stage | Since | Until |
-| ------------------------------------- | ------- | ----- | ----- | ----- |
-| `FlavorFungibility`                   | `true`  | Beta  | 0.5   |       |
-| `MultiKueue`                          | `false` | Alpha | 0.6   | 0.8   |
-| `MultiKueue`                          | `true`  | Beta  | 0.9   |       |
-| `MultiKueueBatchJobWithManagedBy`     | `false` | Alpha | 0.8   |       |
-| `PartialAdmission`                    | `false` | Alpha | 0.4   | 0.4   |
-| `PartialAdmission`                    | `true`  | Beta  | 0.5   |       |
-| `ProvisioningACC`                     | `false` | Alpha | 0.5   | 0.6   |
-| `ProvisioningACC`                     | `true`  | Beta  | 0.7   |       |
-| `QueueVisibility`                     | `false` | Alpha | 0.5   | 0.9   |
-| `VisibilityOnDemand`                  | `false` | Alpha | 0.6   | 0.8   |
-| `VisibilityOnDemand`                  | `true`  | Beta  | 0.9   |       |
-| `PrioritySortingWithinCohort`         | `true`  | Beta  | 0.6   |       |
-| `LendingLimit`                        | `false` | Alpha | 0.6   | 0.8   |
-| `LendingLimit`                        | `true`  | Beta  | 0.9   |       |
-| `MultiplePreemptions`                 | `false` | Alpha | 0.8   | 0.8   |
-| `MultiplePreemptions`                 | `true`  | Beta  | 0.9   | 0.9   |
-| `TopologyAwareScheduling`             | `false` | Alpha | 0.9   |       |
-| `ConfigurableResourceTransformations` | `false` | Alpha | 0.9   | 0.9   |
-| `ConfigurableResourceTransformations` | `true`  | Beta  | 0.10  |       |
-| `WorkloadResourceRequestsSummary`     | `false` | Alpha | 0.9   | 0.9   |
-| `WorkloadResourceRequestsSummary`     | `true`  | Beta  | 0.10  | 0.10  |
-| `ManagedJobsNamespaceSelector`        | `true`  | Beta  | 0.10  |       |
-| `LocalQueueDefaulting`                | `false` | Alpha | 0.10  | 0.11  |
-| `LocalQueueDefaulting`                | `true`  | Beta  | 0.12  |       |
-| `LocalQueueMetrics`                   | `false` | Alpha | 0.10  |       |
-| `HierarchicalCohort`                  | `true`  | Beta  | 0.11  |       |
-| `ObjectRetentionPolicies`             | `false` | Alpha | 0.12  |       |
-| `TASFailedNodeReplacement`            | `false` | Alpha | 0.12  |       |
-| `AdmissionFairSharing`                | `false` | Alpha | 0.12  |       |
-| `TASFailedNodeReplacementFailFast`    | `false` | Alpha | 0.12  |       |
+| Feature                                       | Default | Stage | Since | Until |
+|-----------------------------------------------|---------|-------|-------|-------|
+| `FlavorFungibility`                           | `true`  | Beta  | 0.5   |       |
+| `MultiKueue`                                  | `false` | Alpha | 0.6   | 0.8   |
+| `MultiKueue`                                  | `true`  | Beta  | 0.9   |       |
+| `MultiKueueBatchJobWithManagedBy`             | `false` | Alpha | 0.8   |       |
+| `PartialAdmission`                            | `false` | Alpha | 0.4   | 0.4   |
+| `PartialAdmission`                            | `true`  | Beta  | 0.5   |       |
+| `ProvisioningACC`                             | `false` | Alpha | 0.5   | 0.6   |
+| `ProvisioningACC`                             | `true`  | Beta  | 0.7   | 0.14  |
+| `QueueVisibility`                             | `false` | Alpha | 0.5   | 0.9   |
+| `VisibilityOnDemand`                          | `false` | Alpha | 0.6   | 0.8   |
+| `VisibilityOnDemand`                          | `true`  | Beta  | 0.9   |       |
+| `PrioritySortingWithinCohort`                 | `true`  | Beta  | 0.6   |       |
+| `LendingLimit`                                | `false` | Alpha | 0.6   | 0.8   |
+| `LendingLimit`                                | `true`  | Beta  | 0.9   |       |
+| `TopologyAwareScheduling`                     | `false` | Alpha | 0.9   |       |
+| `ConfigurableResourceTransformations`         | `false` | Alpha | 0.9   | 0.9   |
+| `ConfigurableResourceTransformations`         | `true`  | Beta  | 0.10  |       |
+| `ManagedJobsNamespaceSelector`                | `true`  | Beta  | 0.10  | 0.13  |
+| `LocalQueueDefaulting`                        | `false` | Alpha | 0.10  | 0.11  |
+| `LocalQueueDefaulting`                        | `true`  | Beta  | 0.12  |       |
+| `LocalQueueMetrics`                           | `false` | Alpha | 0.10  |       |
+| `HierarchicalCohort`                          | `true`  | Beta  | 0.11  |       |
+| `ObjectRetentionPolicies`                     | `false` | Alpha | 0.12  | 0.12  |
+| `ObjectRetentionPolicies`                     | `true`  | Beta  | 0.13  |       |
+| `TASFailedNodeReplacement`                    | `false` | Alpha | 0.12  |       |
+| `AdmissionFairSharing`                        | `false` | Alpha | 0.12  |       |
+| `TASFailedNodeReplacementFailFast`            | `false` | Alpha | 0.12  |       |
+| `TASReplaceNodeOnPodTermination`              | `false` | Alpha | 0.13  |       |
+| `ElasticJobsViaWorkloadSlices`                | `false` | Alpha | 0.13  |       |
+| `ManagedJobsNamespaceSelectorAlwaysRespected` | `false` | Alpha | 0.13  |       |
+| `FlavorFungibilityImplicitPreferenceDefault`  | `false` | Alpha | 0.13  |       |
 
 ### Feature gates for graduated or deprecated features
 
 | Feature                           | Default | Stage      | Since | Until |
 | --------------------------------- | ------- | ---------- | ----- | ----- |
+| `ManagedJobsNamespaceSelector`    | `true`  | GA         | 0.13  |       |
+| `ProvisioningACC`                 | `true`  | GA         | 0.14  |       |
 | `QueueVisibility`                 | `false` | Alpha      | 0.4   | 0.9   |
 | `QueueVisibility`                 | `false` | Deprecated | 0.9   |       |
-| `MultiplePreemptions`             | `false` | Alpha      | 0.8   | 0.8   |
-| `MultiplePreemptions`             | `true`  | Beta       | 0.9   | 0.9   |
-| `MultiplePreemptions`             | `true`  | GA         | 0.10  |       |
-| `WorkloadResourceRequestsSummary` | `false` | Alpha      | 0.9   | 0.10  |
-| `WorkloadResourceRequestsSummary` | `true`  | Beta       | 0.10  | 0.11  |
-| `WorkloadResourceRequestsSummary` | `true`  | GA         | 0.11  |       |
 | `TASProfileMostFreeCapacity`      | `false` | Deprecated | 0.11  | 0.13  |
 | `TASProfileLeastFreeCapacity`     | `false` | Deprecated | 0.11  |       |
 | `TASProfileMixed`                 | `false` | Deprecated | 0.11  |       |

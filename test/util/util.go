@@ -71,6 +71,7 @@ import (
 	utiltas "sigs.k8s.io/kueue/pkg/util/tas"
 	"sigs.k8s.io/kueue/pkg/util/testing"
 	"sigs.k8s.io/kueue/pkg/workload"
+	"sigs.k8s.io/kueue/pkg/workloadslicing"
 )
 
 const (
@@ -364,6 +365,14 @@ func ExpectWorkloadToFinish(ctx context.Context, k8sClient client.Client, wlKey 
 	}, LongTimeout, Interval).Should(gomega.Succeed())
 }
 
+func ExpectPodsReadyCondition(ctx context.Context, k8sClient client.Client, wlKey client.ObjectKey) {
+	gomega.EventuallyWithOffset(1, func(g gomega.Gomega) {
+		var wl kueue.Workload
+		g.Expect(k8sClient.Get(ctx, wlKey, &wl)).To(gomega.Succeed())
+		g.Expect(wl.Status.Conditions).To(testing.HaveConditionStatusTrue(kueue.WorkloadPodsReady), "pods are ready")
+	}, LongTimeout, Interval).Should(gomega.Succeed())
+}
+
 func AwaitWorkloadEvictionByPodsReadyTimeout(ctx context.Context, k8sClient client.Client, wlKey client.ObjectKey, sleep time.Duration) {
 	if sleep > 0 {
 		time.Sleep(sleep)
@@ -562,6 +571,11 @@ func ExpectEvictedWorkloadsTotalMetric(cqName, reason string, v int) {
 	expectCounterMetric(metric, v)
 }
 
+func ExpectPodsReadyToEvictedTimeSeconds(cqName, reason string, v int) {
+	metric := metrics.PodsReadyToEvictedTimeSeconds
+	expectHistogramMetric(metric, cqName, reason, v)
+}
+
 func ExpectEvictedWorkloadsOnceTotalMetric(cqName string, reason, underlyingCause string, v int) {
 	metric := metrics.EvictedWorkloadsOnceTotal.WithLabelValues(cqName, reason, underlyingCause)
 	expectCounterMetric(metric, v)
@@ -580,6 +594,14 @@ func ExpectQuotaReservedWorkloadsTotalMetric(cq *kueue.ClusterQueue, v int) {
 func expectCounterMetric(metric prometheus.Counter, count int) {
 	gomega.EventuallyWithOffset(2, func(g gomega.Gomega) {
 		v, err := testutil.GetCounterMetricValue(metric)
+		g.Expect(err).ToNot(gomega.HaveOccurred())
+		g.Expect(int(v)).Should(gomega.Equal(count))
+	}, Timeout, Interval).Should(gomega.Succeed())
+}
+
+func expectHistogramMetric(metric *prometheus.HistogramVec, cqName, preemptionReason string, count int) {
+	gomega.EventuallyWithOffset(2, func(g gomega.Gomega) {
+		v, err := testutil.GetHistogramMetricCount(metric.WithLabelValues(cqName, preemptionReason))
 		g.Expect(err).ToNot(gomega.HaveOccurred())
 		g.Expect(int(v)).Should(gomega.Equal(count))
 	}, Timeout, Interval).Should(gomega.Succeed())
@@ -1087,4 +1109,64 @@ func SetNodeCondition(ctx context.Context, k8sClient client.Client, node *corev1
 			g.Expect(k8sClient.Status().Update(ctx, &updatedNode)).To(gomega.Succeed())
 		}
 	}, Timeout, Interval).Should(gomega.Succeed(), "Failed to set node condition %s to %s for node %s", newCondition.Type, newCondition.Status, node.Name)
+}
+
+func ExpectLocalQueueFairSharingUsageToBe(ctx context.Context, k8sClient client.Client, lqKey client.ObjectKey, comparator string, compareTo any) {
+	lq := &kueue.LocalQueue{}
+	gomega.Eventually(func(g gomega.Gomega) {
+		g.Expect(k8sClient.Get(ctx, lqKey, lq)).Should(gomega.Succeed())
+		g.Expect(lq.Status.FairSharing).ShouldNot(gomega.BeNil())
+		g.Expect(lq.Status.FairSharing.AdmissionFairSharingStatus).ShouldNot(gomega.BeNil())
+		g.Expect(lq.Status.FairSharing.AdmissionFairSharingStatus.ConsumedResources).Should(gomega.HaveLen(1))
+		usage := lq.Status.FairSharing.AdmissionFairSharingStatus.ConsumedResources[corev1.ResourceCPU]
+		g.Expect(usage.MilliValue()).To(gomega.BeNumerically(comparator, compareTo))
+	}, Timeout, Interval).Should(gomega.Succeed())
+}
+
+// ExpectWorkloadsInNamespace waits until the specified number of kueue.Workload
+// objects exist in the given namespace, then returns the list observed at that moment.
+//
+// It repeatedly lists Workloads using the provided client until the count of
+// items matches the expected value. The poll frequency and maximum wait time are
+// controlled by the test-scoped Interval and Timeout variables. If the expected
+// count is not reached before Timeout, the test fails.
+//
+// Returns:
+//
+//	The slice of Workloads present in the namespace when the expectation is met.
+func ExpectWorkloadsInNamespace(ctx context.Context, k8sClient client.Client, namespace string, count int) []kueue.Workload {
+	list := &kueue.WorkloadList{}
+	gomega.Eventually(func(g gomega.Gomega) {
+		g.Expect(k8sClient.List(ctx, list, client.InNamespace(namespace))).To(gomega.Succeed())
+		g.Expect(list.Items).Should(gomega.HaveLen(count))
+	}, Timeout, Interval).Should(gomega.Succeed())
+	return list.Items
+}
+
+// ExpectNewWorkloadSlice waits until a new kueue.Workload is created in the same
+// namespace as the given oldWorkload, and whose replacement annotation points to
+// the oldWorkload's key.
+//
+// This helper repeatedly lists Workloads in the oldWorkload's namespace until it
+// finds one where workloadslicing.ReplacementForKey matches the key of the given
+// oldWorkload. The search is retried until the test-scoped Timeout expires, polling
+// at the configured Interval. If no such workload is found within the Timeout,
+// the test fails.
+//
+// Returns:
+//   - newWorkload: A pointer to the discovered replacement Workload. Guaranteed
+//     non-nil if the function succeeds; otherwise, the test fails before returning.
+func ExpectNewWorkloadSlice(ctx context.Context, k8sClient client.Client, oldWorkload *kueue.Workload) (newWorkload *kueue.Workload) {
+	gomega.Eventually(func(g gomega.Gomega) {
+		wlList := &kueue.WorkloadList{}
+		g.Expect(k8sClient.List(ctx, wlList, client.InNamespace(oldWorkload.Namespace))).To(gomega.Succeed())
+		for i := range wlList.Items {
+			wl := &wlList.Items[i]
+			if key := workloadslicing.ReplacementForKey(wl); key != nil && *key == workload.Key(oldWorkload) {
+				newWorkload = wl
+				break
+			}
+		}
+	}, Timeout, Interval).Should(gomega.Succeed())
+	return newWorkload
 }

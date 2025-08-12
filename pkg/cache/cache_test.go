@@ -41,8 +41,8 @@ import (
 	kueue "sigs.k8s.io/kueue/apis/kueue/v1beta1"
 	"sigs.k8s.io/kueue/pkg/features"
 	"sigs.k8s.io/kueue/pkg/hierarchy"
-	"sigs.k8s.io/kueue/pkg/queue"
 	"sigs.k8s.io/kueue/pkg/resources"
+	"sigs.k8s.io/kueue/pkg/util/queue"
 	utiltesting "sigs.k8s.io/kueue/pkg/util/testing"
 	"sigs.k8s.io/kueue/pkg/workload"
 )
@@ -494,17 +494,17 @@ func TestCacheClusterQueueOperations(t *testing.T) {
 			operation: func(log logr.Logger, cache *Cache) error {
 				_ = setup(log, cache)
 				updateCqs := []kueue.ClusterQueue{
-					utiltesting.MakeClusterQueue("a").NamespaceSelector(nil).Cohort("three").ClusterQueue,
-					utiltesting.MakeClusterQueue("b").NamespaceSelector(nil).ClusterQueue,
-					utiltesting.MakeClusterQueue("c").NamespaceSelector(nil).Cohort("three").ClusterQueue,
+					*utiltesting.MakeClusterQueue("a").NamespaceSelector(nil).Cohort("three").Obj(),
+					*utiltesting.MakeClusterQueue("b").NamespaceSelector(nil).Obj(),
+					*utiltesting.MakeClusterQueue("c").NamespaceSelector(nil).Cohort("three").Obj(),
 				}
 				for _, c := range updateCqs {
 					_ = cache.UpdateClusterQueue(log, &c)
 				}
 				deleteCqs := []kueue.ClusterQueue{
-					utiltesting.MakeClusterQueue("d").Cohort("two").ClusterQueue,
-					utiltesting.MakeClusterQueue("e").Cohort("two").ClusterQueue,
-					utiltesting.MakeClusterQueue("f").Cohort("two").ClusterQueue,
+					*utiltesting.MakeClusterQueue("d").Cohort("two").Obj(),
+					*utiltesting.MakeClusterQueue("e").Cohort("two").Obj(),
+					*utiltesting.MakeClusterQueue("f").Cohort("two").Obj(),
 				}
 				for _, c := range deleteCqs {
 					cache.DeleteClusterQueue(&c)
@@ -562,8 +562,11 @@ func TestCacheClusterQueueOperations(t *testing.T) {
 			},
 			wantClusterQueues: map[kueue.ClusterQueueReference]*clusterQueue{
 				"b": {
-					Name:                          "b",
-					AllocatableResourceGeneration: 1,
+					Name: "b",
+					// AllocatableResourceGeneration is 2 because it was incremented:
+					// 1. Once during initial setup when added to cohort "one"
+					// 2. Once during deletion when cohort tree resources were recalculated after "a" was deleted
+					AllocatableResourceGeneration: 2,
 					NamespaceSelector:             labels.Nothing(),
 					FlavorFungibility:             defaultFlavorFungibility,
 					Status:                        active,
@@ -3603,15 +3606,18 @@ func TestCohortCycles(t *testing.T) {
 		}
 
 		cohort := utiltesting.MakeCohort("cohort").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").FlavorQuotas).Obj()
+			ResourceGroup(
+				*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").Obj(),
+			).Obj()
 		if err := cache.AddOrUpdateCohort(cohort); err != nil {
 			t.Fatal("Expected success")
 		}
 
 		// Error when creating cq with parent that has cycle
 		cq := utiltesting.MakeClusterQueue("cq").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "5").FlavorQuotas).
-			Cohort("cycle").Obj()
+			ResourceGroup(
+				*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "5").Obj(),
+			).Cohort("cycle").Obj()
 		if err := cache.AddClusterQueue(ctx, cq); err == nil {
 			t.Fatal("Expected failure")
 		}
@@ -3646,15 +3652,14 @@ func TestCohortCycles(t *testing.T) {
 			t.Fatal("Expected failure")
 		}
 		cohort := utiltesting.MakeCohort("cohort").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").FlavorQuotas).Obj()
+			ResourceGroup(*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").Obj()).Obj()
 		if err := cache.AddOrUpdateCohort(cohort); err != nil {
 			t.Fatal("Expected success")
 		}
 
 		// Add CQ to cohort
 		cq := utiltesting.MakeClusterQueue("cq").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "5").FlavorQuotas).
-			Cohort("cohort").Obj()
+			ResourceGroup(*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "5").Obj()).Cohort("cohort").Obj()
 		if err := cache.AddClusterQueue(ctx, cq); err != nil {
 			t.Fatal("Expected success")
 		}
@@ -3708,7 +3713,7 @@ func TestCohortCycles(t *testing.T) {
 		}
 
 		cohort := utiltesting.MakeCohort("cohort").Parent("root1").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").FlavorQuotas).Obj()
+			ResourceGroup(*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").Obj()).Obj()
 		if err := cache.AddOrUpdateCohort(cohort); err != nil {
 			t.Fatal("Expected success")
 		}
@@ -3773,7 +3778,9 @@ func TestCohortCycles(t *testing.T) {
 		}
 
 		cohort := utiltesting.MakeCohort("cohort").Parent("cycle-root").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").FlavorQuotas).Obj()
+			ResourceGroup(
+				*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").Obj(),
+			).Obj()
 		if err := cache.AddOrUpdateCohort(cohort); err == nil {
 			t.Fatal("Expected failure")
 		}
@@ -3806,7 +3813,9 @@ func TestCohortCycles(t *testing.T) {
 		}
 
 		cohort := utiltesting.MakeCohort("cohort").Parent("root").
-			ResourceGroup(utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").FlavorQuotas).Obj()
+			ResourceGroup(
+				*utiltesting.MakeFlavorQuotas("arm").Resource(corev1.ResourceCPU, "10").Obj(),
+			).Obj()
 		if err := cache.AddOrUpdateCohort(cohort); err != nil {
 			t.Fatal("Expected success")
 		}
@@ -3860,9 +3869,9 @@ func TestSnapshotError(t *testing.T) {
 	localQueue := *utiltesting.MakeLocalQueue("lq", "default").ClusterQueue("cq").Obj()
 	clusterQueue := utiltesting.MakeClusterQueue("cq").
 		ResourceGroup(
-			utiltesting.MakeFlavorQuotas("tas-default").
+			*utiltesting.MakeFlavorQuotas("tas-default").
 				ResourceQuotaWrapper("cpu").NominalQuota("8").Append().
-				FlavorQuotas,
+				Obj(),
 		).ClusterQueue
 
 	clientBuilder := utiltesting.NewClientBuilder()
