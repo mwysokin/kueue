@@ -123,7 +123,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-kueue-hook-sa
       containers:
       - name: kubectl-apply
-        image: bitnami/kubectl:latest
+        image: alpine/k8s:1.33.5
         command:
         - /bin/sh
         - -c
